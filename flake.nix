@@ -1,28 +1,31 @@
 {
-  description = "A math bot";
-
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    utils.url = "github:numtide/flake-utils";
+    naersk.url = "github:nix-community/naersk";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, ... }:
-  let
-    system = "x86_64-linux";
-    overlays = [ (import rust-overlay) ];
+  outputs = { self, nixpkgs, utils, naersk }:
+    utils.lib.eachDefaultSystem (system: let
+      pkgs = nixpkgs.legacyPackages."${system}";
+      naersk-lib = naersk.lib."${system}";
+    in rec {
+      # `nix build`
+      packages.myproject = naersk-lib.buildPackage {
+        pname = "mathcord";
+        root = ./.;
+      };
+      defaultPackage = packages.myproject;
 
-    pkgs = import nixpkgs {
-      inherit system overlays;
-    };
+      # `nix run`
+      apps.myproject = utils.lib.mkApp {
+        drv = packages.myproject;
+      };
+      defaultApp = apps.myproject;
 
-    lib = nixpkgs.lib;
-  in
-  {
-    devShells."x86_64-linux".default = pkgs.mkShell {
-      buildInputs = [
-        pkgs.rust-bin.stable.latest.default
-      ];
-
-    };
-  };
+      # `nix develop`
+      devShell = pkgs.mkShell {
+        nativeBuildInputs = with pkgs; [ rustc cargo ];
+        RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+      };
+    });
 }
