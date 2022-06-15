@@ -16,13 +16,13 @@
         pname = "mathcord";
         root = ./.;
       };
-      defaultPackage = packages.myproject;
+      packages.default = packages.myproject;
 
       # `nix run`
       apps.myproject = utils.lib.mkApp {
         drv = packages.myproject;
       };
-      defaultApp = apps.myproject;
+      apps.default = apps.myproject;
 
       # `nix develop`
       devShell = pkgs.mkShell {
