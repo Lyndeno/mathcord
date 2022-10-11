@@ -7,7 +7,7 @@ prelude::*,
 };
 
 const HELP_MESSAGE: &str = "
-I am MathWalter
+I am Mathcord
 
 I solve math problems
 
@@ -18,6 +18,7 @@ Need assistance?
 const HELP_COMMAND: &str = "!help";
 
 const ADD_COMMAND: &str = "!add";
+const SUB_COMMAND: &str = "!sub";
 const MATH_COMMAND: &str = "!math";
 
 struct Handler;
@@ -37,6 +38,15 @@ impl EventHandler for Handler {
             let mut sum: f64 = 0.0;
             for number in mysplit {
                 sum = sum + number.parse::<f64>().unwrap();
+            }
+            send_message(ctx, msg, &("Result is: ".to_string() + &sum.to_string())).await;
+        }
+        else if msg.content.contains(SUB_COMMAND) {
+            let add_args = msg.content.replace(SUB_COMMAND, "");
+            let mut mysplit = add_args.split_whitespace();
+            let mut sum: f64 = mysplit.next().expect("This argument is not a number").parse::<f64>().unwrap();
+            for number in mysplit {
+                sum = sum - number.parse::<f64>().unwrap();
             }
             send_message(ctx, msg, &("Result is: ".to_string() + &sum.to_string())).await;
         }
